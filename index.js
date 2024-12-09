@@ -1,9 +1,9 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const productsRoutes = require("./routes/products");
-const salesRoutes = require("./routes/sales");
-const financialRecordsRoutes = require("./routes/financialRecords");
+const productsRoutes = require("./src/routes/products");
+const salesRoutes = require("./src/routes/sales");
+const financialRecordsRoutes = require("./src/routes/financialRecords");
 
 const app = express();
 
