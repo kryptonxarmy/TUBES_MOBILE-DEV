@@ -1,0 +1,18 @@
+{
+  "name": "Backend",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
+  "author": "Kelompok Tubes EISD [Danu, ila, Apip]]",
+  "license": "MIT",
+  "dependencies": {
+    "@prisma/client": "^6.0.1",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "prisma": "^6.0.1"
+  }
+}

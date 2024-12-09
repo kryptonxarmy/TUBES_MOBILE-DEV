@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // atau mysql sesuai kebutuhan
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  stock       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Sales       Sale[]   @relation("ProductSales")
+}
+
+model Sale {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  product     Product   @relation("ProductSales", fields: [productId], references: [id])
+  quantity    Int
+  totalAmount Float
+  createdAt   DateTime @default(now())
+}
+
+model FinancialRecord {
+  id          Int      @id @default(autoincrement())
+  type        String   // e.g., "income", "expense"
+  amount      Float
+  description String?
+  createdAt   DateTime @default(now())
+}
