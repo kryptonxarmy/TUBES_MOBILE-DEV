@@ -16,6 +16,10 @@ app.use("/api/products", productsRoutes);
 app.use("/api/sales", salesRoutes);
 app.use("/api/financial-records", financialRecordsRoutes);
 
+app.get("/", (req, res) => {
+  res.send("Hello, world!");
+});
+
 // Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
