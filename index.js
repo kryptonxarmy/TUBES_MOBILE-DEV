@@ -17,7 +17,7 @@ app.use("/api/sales", salesRoutes);
 app.use("/api/financial-records", financialRecordsRoutes);
 
 app.get("/", (req, res) => {
-  res.send("Hello, world!");
+  res.send("NYAWNYAWWW !");
 });
 
 // Server
