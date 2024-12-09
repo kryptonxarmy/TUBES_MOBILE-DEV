@@ -3,30 +3,46 @@ const { PrismaClient } = require("@prisma/client");
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Get financial records
-router.get("/", async (req, res) => {
-  try {
-    const records = await prisma.financialRecord.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(records);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Add a sale
+router.post("/", async (req, res) => {
+  const { productId, quantity } = req.body;
 
-// Get total income
-router.get("/total-income", async (req, res) => {
   try {
-    const totalIncome = await prisma.financialRecord.aggregate({
-      _sum: {
-        amount: true,
-      },
-      where: {
-        type: "income",
+    // Get product details
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product || product.stock < quantity) {
+      return res.status(400).json({ error: "Insufficient stock or invalid product" });
+    }
+
+    // Create sale
+    const totalAmount = product.price * quantity;
+    const sale = await prisma.sale.create({
+      data: {
+        productId,
+        quantity,
+        totalAmount,
       },
     });
-    res.json({ totalIncome: totalIncome._sum.amount || 0 });
+
+    // Update stock
+    await prisma.product.update({
+      where: { id: productId },
+      data: { stock: product.stock - quantity },
+    });
+
+    // Add financial record
+    await prisma.financialRecord.create({
+      data: {
+        type: "income",
+        amount: totalAmount,
+        description: `Sale of ${quantity}x ${product.name}`,
+      },
+    });
+
+    res.json(sale);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
