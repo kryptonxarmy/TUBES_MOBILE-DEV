@@ -15,4 +15,20 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/total-income", async (req, res) => {
+    try {
+      const totalIncome = await prisma.financialRecord.aggregate({
+        _sum: {
+          amount: true,
+        },
+        where: {
+          type: "income",
+        },
+      });
+      res.json({ totalIncome: totalIncome._sum.amount || 0 });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
 module.exports = router;
