@@ -5,44 +5,61 @@ const prisma = new PrismaClient();
 
 // Add a sale
 router.post("/", async (req, res) => {
-  const { productId, quantity } = req.body;
+  const { products, date } = req.body;
 
   try {
-    // Get product details
-    const product = await prisma.product.findUnique({
-      where: { id: productId },
-    });
+    const sales = [];
+    let totalAmount = 0;
+    let description = 'Sale of multiple products: ';
 
-    if (!product || product.stock < quantity) {
-      return res.status(400).json({ error: "Insufficient stock or invalid product" });
+    for (const item of products) {
+      const { productId, quantity } = item;
+
+      // Get product details
+      const product = await prisma.product.findUnique({
+        where: { id: productId },
+      });
+
+      if (!product || product.stock < quantity) {
+        return res.status(400).json({ error: `Insufficient stock or invalid product for productId: ${productId}` });
+      }
+
+      // Create sale
+      const saleAmount = product.price * quantity;
+      totalAmount += saleAmount;
+      const sale = await prisma.sale.create({
+        data: {
+          productId,
+          quantity,
+          totalAmount: saleAmount,
+          date: new Date(date),
+        },
+      });
+
+      // Update stock
+      await prisma.product.update({
+        where: { id: productId },
+        data: { stock: product.stock - quantity },
+      });
+
+      sales.push(sale);
+      description += `${product.name} (x${quantity}), `;
     }
 
-    // Create sale
-    const totalAmount = product.price * quantity;
-    const sale = await prisma.sale.create({
-      data: {
-        productId,
-        quantity,
-        totalAmount,
-      },
-    });
-
-    // Update stock
-    await prisma.product.update({
-      where: { id: productId },
-      data: { stock: product.stock - quantity },
-    });
+    // Remove trailing comma and space
+    description = description.substring(0, description.length - 2);
 
     // Add financial record
     await prisma.financialRecord.create({
       data: {
         type: "income",
         amount: totalAmount,
-        description: `Sale of ${quantity}x ${product.name}`,
+        description: description,
+        createdAt: new Date(date), // Use the same date as the sale
       },
     });
 
-    res.json(sale);
+    res.json(sales);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

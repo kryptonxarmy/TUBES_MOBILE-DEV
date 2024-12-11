@@ -23,8 +23,9 @@ model Sale {
   productId   Int
   product     Product   @relation("ProductSales", fields: [productId], references: [id])
   quantity    Int
+  date        DateTime  @default(now())
   totalAmount Float
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 }
 
 model FinancialRecord {
